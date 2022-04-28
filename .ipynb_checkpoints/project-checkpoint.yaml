@@ -1,0 +1,16 @@
+kind: project
+metadata:
+  name: nyc-taxi-git
+  created: '2022-04-28T15:00:34.497000+00:00'
+spec:
+  functions: []
+  workflows: []
+  artifacts: []
+  source: git://github.com/GiladShapira94/taxi-git.git#refs/heads/master
+  subpath: ''
+  origin_url: git://github.com/GiladShapira94/taxi-git.git#refs/heads/master
+  desired_state: online
+  owner: shapira
+  disable_auto_mount: false
+status:
+  state: online
