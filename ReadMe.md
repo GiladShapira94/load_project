@@ -86,3 +86,110 @@ Need to define artifact object (other attributes can be define and will ovrite t
 ````
 project.set_artifact(key='training_model',artifact='<artifact object>',target_path='<target path>')#model artifacts
 ````
+* This option allow to define which artifact object it related to.
+
+### Set worfklow - [link to function documentation](https://docs.mlrun.org/en/latest/api/mlrun.projects.html?highlight=set_workflow#mlrun.projects.MlrunProject.set_workflow)
+Save workflow python file to Project YAML, Example:
+* **Parameters  -**
+  * name – name of the workflow
+  * workflow_path – url/path for the workflow file
+  * embed – add the workflow code into the project.yaml
+  * engine – workflow processing engine (“kfp” or “local”)
+  * args_schema – list of arg schema definitions (:py:class`~mlrun.model.EntrypointParam`)
+  * handler – workflow function handler
+  * args – argument values (key=value, ..) 
+
+````
+project.set_workflow('main', 'workflow.py', embed=True)
+````
+**Important -** After you stop edit the project YAML execute project.save() command to save to project YAML and export it.
+````
+project.save()
+````
+
+## Project YAML Example-
+````
+kind: project
+metadata:
+  name: nyc-taxi-gilad
+  created: '2022-05-04T14:40:09.856000+00:00'
+spec:
+  functions:
+  - url: taxi.yaml
+    name: taxi
+  - url: serving.py
+    name: serving
+    kind: nuclio
+    image: mlrun/mlrun
+  - url: trainer.py
+    name: trainer
+    image: mlrun/mlrun
+    handler: train
+  workflows:
+  - name: main
+    code: "from kfp import dsl\nfrom mlrun.platforms import auto_mount\nimport os\n\
+      import sys\nimport mlrun\n\nfuncs = {}\n\n# init functions is used to configure\
+      \ function resources and local settings\ndef init_functions(functions: dict,\
+      \ project=None, secrets=None):\n    for f in functions.values():\n        f.apply(auto_mount())\n\
+      \n@dsl.pipeline(\n    name=\"NYC Taxi Demo\",\n    description=\"Convert ML\
+      \ script to MLRun\"\n)\n\ndef kfpipeline():\n\n    taxi_records_csv_path = mlrun.get_sample_path('data/Taxi/yellow_tripdata_2019-01_subset.csv')\n\
+      \    zones_csv_path = mlrun.get_sample_path('data/Taxi/taxi_zones.csv')\n  \
+      \  \n    # build our ingestion function (container image)\n    builder = funcs['taxi'].deploy_step(skip_deployed=True)\n\
+      \    \n    # run the ingestion function with the new image and params\n    ingest\
+      \ = funcs['taxi'].as_step(\n        name=\"fetch_data\",\n        handler='fetch_data',\n\
+      \        image=builder.outputs['image'],\n        inputs={'taxi_records_csv_path':\
+      \ taxi_records_csv_path,\n                'zones_csv_path': zones_csv_path},\n\
+      \        outputs=['nyc-taxi-dataset', 'zones-dataset'])\n\n    # Join and transform\
+      \ the data sets \n    transform = funcs[\"taxi\"].as_step(\n        name=\"\
+      transform_dataset\",\n        handler='transform_dataset',\n        inputs={\"\
+      taxi_records_csv_path\": ingest.outputs['nyc-taxi-dataset'],\n             \
+      \   \"zones_csv_path\" : ingest.outputs['zones-dataset']},\n        outputs=['nyc-taxi-dataset-transformed'])\n\
+      \n    # Train the model\n    train = funcs[\"taxi\"].as_step(\n        name=\"\
+      train\",\n        handler=\"train_model\",\n        inputs={\"input_ds\" : transform.outputs['nyc-taxi-dataset-transformed']},\n\
+      \        outputs=['FareModel'])\n    \n    # Deploy the model\n    deploy =\
+      \ funcs[\"model-serving\"].deploy_step(models={\"taxi-serving_v1\": train.outputs['FareModel']},\
+      \ tag='v2')\n"
+    engine: null
+  artifacts:
+  - kind: model
+    metadata:
+      key: training_model
+      project: nyc-taxi-gilad
+      iter: 0
+      tree: latest
+      hash: 69f92d6005a0cdf9744ebf555e0b5f0ba0cfa5d4
+    spec:
+      target_path: v3io://webapi.default-tenant.app.cust-cs-3-2-3.iguazio-cd2.com/projects/fraud-demo-gilad/artifacts/model/3/model.pkl
+      size: 27694
+      db_key: training_model
+      extra_data:
+        probability calibration: v3io:///projects/fraud-demo-gilad/artifacts/model/plots/3/probability-calibration.html
+        confusion matrix table.csv: v3io:///projects/fraud-demo-gilad/artifacts/model/3/confusion
+          matrix table.csv
+        confusion matrix: v3io:///projects/fraud-demo-gilad/artifacts/model/plots/3/confusion-matrix.html
+        feature importances: v3io:///projects/fraud-demo-gilad/artifacts/model/plots/3/feature-importances.html
+        feature importances table.csv: v3io:///projects/fraud-demo-gilad/artifacts/model/3/feature
+          importances table.csv
+        precision_recall_bin: v3io:///projects/fraud-demo-gilad/artifacts/model/plots/3/precision-recall-binary.html
+        roc_bin: v3io:///projects/fraud-demo-gilad/artifacts/model/plots/3/roc-binary.html
+      model_file: model.pkl
+    status:
+      state: created
+  - kind: dataset
+    metadata:
+      project: nyc-taxi-gilad
+      key: taxi-fetch_data_nyc-taxi-dataset
+    spec:
+      target_path: v3io://webapi.default-tenant.app.cust-cs-3-2-3.iguazio-cd2.com/projects/nyc-taxi-gilad/artifacts/data/nyc-taxi-dataset.csv
+      format: ''
+    status:
+      state: created
+  subpath: ''
+  origin_url: ''
+  load_source_on_run: true
+  desired_state: online
+  owner: Gilad
+  disable_auto_mount: false
+status:
+  state: online
+````
