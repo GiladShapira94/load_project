@@ -6,14 +6,18 @@
   * Add to the function YAML attributes, with_repo = True - If the function is not a single file function, and it requires access to multiple files/libraries in the project.
 * Remote Storage - 
   * All artifacts need to be upload to remote storage ot locally saved on Cluster B
- 
+* load project or create one, Example:
+This important becuse you need to create an project object instance (MlrunProject object)
+````
+project = mlrun.get_or_create_project(name='nyc-taxi-gilad',context='./nyc-gilad')
+````
 # Process on Cluster A 
 For this Example i allready run a project that called nyc-taxi and he had two functions (taxi: mlrun job, model-serving: mlrun serving) and one trained model.
 ## Create Project YAML -
 On thie paragraph you would explain how to save your project YAML, and what are the option that you have.
 
 ### Set Function - [link to function documentation](https://docs.mlrun.org/en/latest/api/mlrun.projects.html?highlight=set_function#mlrun.projects.MlrunProject.set_function)
-Save fucntion object in project YAML, there are three options to set function or by fucntion file, or by function YAML or by fucntion object
+Save fucntions objects in the project YAML, there are three options to set function or by fucntion file, or by function YAML or by fucntion object
 * **Parameters  -**
   * func – function object or spec/code url, None refers to current Notebook
   * name – name of the function (under the project)
@@ -62,4 +66,23 @@ project.set_function(func=taxi_object)
 ````
 project.spec.artifacts[0]['spec']['model_file']='model.pkl'
 ````
+### Set Artifact - [link to function documentation](https://docs.mlrun.org/en/latest/api/mlrun.projects.html?highlight=set_artifact#mlrun.projects.MlrunProject.set_artifact)
+Save artifacts objects in the project YAML, there are two options to set artifcats or by artifcat file, or by artifcat object.
+**important note -** You need to store your artifacts on a remote storage or locally on your target cluster (cluster B) 
+* **Parameters  -**
+  * key – artifact key/name
+  * artifact – mlrun Artifact object (or its subclasses)
+  * target_path – absolute target path url (point to the artifact content location)
+  * tag – artifact tag
+1. **Set Artifact file --** 
+Need to define all relavnt artifacts parameters, except artifact parameter that relevant only when you set artifact by its object, Example:
+````
+project.set_artifact(key='training_model', target_path='<target path>')
+````
+* This option all the artifacts load as artifacts objects not and model or dataset
 
+2. **Set Artifact object --** 
+Need to define artifact object (other attributes can be define and will ovrite the exciting values), Example:
+````
+project.set_artifact(key='training_model',artifact='<artifact object>',target_path='<target path>')#model artifacts
+````
