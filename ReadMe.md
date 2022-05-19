@@ -24,10 +24,10 @@ Save fucntion object in project YAML, there are three options to set function or
   * requirements – list of python packages or pip requirements file path
 
 1. Set function file  -
-
+Need to define all relavnt function parameters, for the func parameter define the function python file as you can see in the examlpe below.
  
 ````
-project.set_function("gen_breast_cancer.py", "gen-breast-cancer", image="mlrun/mlrun")
+project.set_function("gen_breast_cancer.py", "gen-breast-cancer", image="mlrun/mlrun")# set function file gen_breast_cancer.py, named gen_breast_cancer with mlrun/mlrun image
 project.set_function("trainer.py", "trainer", 
                      handler="train", image="mlrun/mlrun")
 project.set_function("serving.py", "serving", image="mlrun/mlrun", kind="serving")
