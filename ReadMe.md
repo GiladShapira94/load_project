@@ -12,7 +12,7 @@ For this Example i allready run a project that called nyc-taxi and he had two fu
 ## Create Project YAML -
 On thie paragraph you would explain how to save your project YAML, and what are the option that you have.
 
-#### Set Function - [link to function documentation](https://docs.mlrun.org/en/latest/api/mlrun.projects.html?highlight=set_function#mlrun.projects.MlrunProject.set_function)
+### Set Function - [link to function documentation](https://docs.mlrun.org/en/latest/api/mlrun.projects.html?highlight=set_function#mlrun.projects.MlrunProject.set_function)
 Save fucntion object in project YAML, there are three options to set function or by fucntion file, or by function YAML or by fucntion object
 * Parameters  -
   * func – function object or spec/code url, None refers to current Notebook
@@ -31,5 +31,12 @@ project.set_function("gen_breast_cancer.py", "gen-breast-cancer", image="mlrun/m
 project.set_function("trainer.py", "trainer", 
                      handler="train", image="mlrun/mlrun")
 project.set_function("serving.py", "serving", image="mlrun/mlrun", kind="serving")
+
 ````
+#### Important Notes for this method - 
+* If you want to deploy a serving function you must add a model before deployment using the [add model method](https://docs.mlrun.org/en/latest/api/mlrun.runtimes.html?highlight=add_model#mlrun.runtimes.ServingRuntime.add_model) to the function object, for generate function object you can simple use this example:
+````
+project.get_function('model-serving')
+```
+
 2. 
