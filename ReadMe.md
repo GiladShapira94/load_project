@@ -14,7 +14,7 @@ On thie paragraph you would explain how to save your project YAML, and what are 
 
 ### Set Function - [link to function documentation](https://docs.mlrun.org/en/latest/api/mlrun.projects.html?highlight=set_function#mlrun.projects.MlrunProject.set_function)
 Save fucntion object in project YAML, there are three options to set function or by fucntion file, or by function YAML or by fucntion object
-* Parameters  -
+* **Parameters  -**
   * func – function object or spec/code url, None refers to current Notebook
   * name – name of the function (under the project)
   * kind – runtime kind e.g. job, nuclio, spark, dask, mpijob default: job
@@ -23,7 +23,7 @@ Save fucntion object in project YAML, there are three options to set function or
   * with_repo – add (clone) the current repo to the build source
   * requirements – list of python packages or pip requirements file path
 
-1. Set function file  -
+1. **Set function file  -**
 Need to define all relavnt function parameters, for the func parameter define the function python file as you can see in the examlpe below.
  
 ````
@@ -33,10 +33,33 @@ project.set_function("trainer.py", "trainer",
 project.set_function("serving.py", "serving", image="mlrun/mlrun", kind="serving")
 
 ````
-#### Important Notes for this method - 
 * If you want to deploy a serving function you must add a model before deployment using the [add model method](https://docs.mlrun.org/en/latest/api/mlrun.runtimes.html?highlight=add_model#mlrun.runtimes.ServingRuntime.add_model) to the function object, for generate function object you can simple use this example:
 ````
 project.get_function('model-serving')
-```
+````
 
-2. 
+2. **Set function YAML -**
+Need to define the func parameter with the function YAML file  and name, as you can see in the examlpe below (other attributes can be define and will ovrite the exciting values).
+````
+project.set_function(func='taxi.yaml',name='taxi')
+````
+* To make the function Yaml you would need to use the [export method](https://docs.mlrun.org/en/latest/api/mlrun.projects.html?highlight=export#mlrun.projects.MlrunProject.export) this method export function object to YAML file, Example:
+````
+project.get_function('model-serving').export(target='./nyc-gilad/serving.yaml')
+````
+* You need add manuly the model_file for **serving function only**, Example:
+````
+project.spec.artifacts[0]['spec']['model_file']='model.pkl'
+````
+
+3. **Set function object -**
+Need to define the func parameter with the function object as you can see in the examlpe below.
+````
+project.set_function(func=taxi_object)
+````
+* it convert the object to dictionary and saved it to the project YAML file, save fucntion YAML in to the project YAML
+* You need add manuly the model_file for **serving function only**, Example:
+````
+project.spec.artifacts[0]['spec']['model_file']='model.pkl'
+````
+
