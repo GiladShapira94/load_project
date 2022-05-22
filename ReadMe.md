@@ -11,7 +11,7 @@ This important becuse you need to create an project object instance (MlrunProjec
 ````
 project = mlrun.get_or_create_project(name='nyc-taxi-gilad',context='./nyc-gilad')
 ````
-# Process on Cluster A 
+# Process on Cluster A (Source) - 
 For this Example i allready run a project that called nyc-taxi and he had two functions (taxi: mlrun job, model-serving: mlrun serving) and one trained model.
 ## Create Project YAML -
 On thie paragraph you would explain how to save your project YAML, and what are the option that you have.
@@ -193,3 +193,7 @@ spec:
 status:
   state: online
 ````
+# Process on Cluster B (Target) -  
+Now after you load the project YAML and upload to a remote storage all your relavent files you can load your project to the target cluster, in this example project files saved on GitHub excepte artifacts that saved on S3 Bucket. 
+
+## Load Project YAML -
