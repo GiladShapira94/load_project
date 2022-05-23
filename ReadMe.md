@@ -196,4 +196,30 @@ status:
 # Process on Cluster B (Target) -  
 Now after you load the project YAML and upload to a remote storage all your relavent files you can load your project to the target cluster, in this example project files saved on GitHub excepte artifacts that saved on S3 Bucket. 
 
-## Load Project YAML -
+
+### Load Project YAML - [link to function documentation](https://docs.mlrun.org/en/latest/api/mlrun.projects.html?highlight=load_project#mlrun.projects.load_project)
+Load project YAML from GitHub, after excution the project will create with remote artifacts (not saved locally to V3IO) and not shown any functions later you will need to deploy or build each funciton.
+* **Parameters  -**
+  * context – project local directory path
+  * url – name (in DB) or git or tar.gz or .zip sources archive path.
+  * name – project name
+  * secrets – key:secret dict or SecretsStore used to download sources
+  * init_git – if True, will git init the context dir
+  * subpath – project subpath (within the archive)
+  * clone – if True, always clone (delete any existing content)
+  * user_project – add the current user name to the project name (for db:// prefixes)
+````
+project = mlrun.load_project(context="./project",url="git://github.com/GiladShapira94/load_project.git",clone=True,init_git=True,name='load-project',user_project=True)
+````
+**Important -** if you change the project YAML for reload the project YAML you can use the reload function.
+* **Parameters  -**
+  * sync – set to True to load functions objects
+  * context – context directory (where the yaml and code exist)
+````
+project.reload(sync=True)
+````
+#### Sync Project Functions - [link to function documentation](https://docs.mlrun.org/en/latest/api/mlrun.projects.html?highlight=sync_functions#mlrun.projects.MlrunProject.sync_functions)
+reload function objects from specs and files, after excution you will see the function on your project but it not deployed
+````
+project.sync_functions(save=True)
+````
