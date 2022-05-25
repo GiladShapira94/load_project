@@ -32,6 +32,28 @@ For this Example i allready run a project that called nyc-taxi and he had two fu
   artifact_path='s3://mlrun-v1-warroom/'
   mlrun.set_environment(artifact_path=artifact_path)
   ````
+ * Set Secrets [Secret Documentation Link](https://docs.mlrun.org/en/latest/secrets.html?highlight=secrets) - 
+   * For local execution -
+   ````
+   os.environ['AWS_ACCESS_KEY_ID']='<AWS_ACCESS_KEY_ID>'
+   os.environ['AWS_SECRET_ACCESS_KEY']='<AWS_SECRET_ACCESS_KEY>'
+   ````
+   ````
+   os.environ['GIT_USERNAME']='<GIT_USERNAME>'
+   os.environ['GIT_PASSWORD']='<GIT_TOKEN>'
+   ````
+   * For Remote execution - Saved as project/k8s secrets
+   ````
+   # Using project-secrets (recommended) - project secrets are automatically mounted to project functions
+   secrets = {'AWS_ACCESS_KEY_ID': '<AWS_ACCESS_KEY_ID>', 'AWS_SECRET_ACCESS_KEY': '<AWS_SECRET_ACCESS_KEY>' 
+              ,'GIT_USERNAME':'<GIT_USERNAME>','GIT_PASSWORD':'<GIT_TOKEN>'}
+   mlrun.get_run_db().create_project_secrets(
+       project.name,
+       provider=mlrun.api.schemas.SecretProviderName.kubernetes,
+       secrets=secrets
+   )
+
+   ````
 ## Create Project YAML -
 On thie paragraph you would explain how to save your project YAML, and what are the option that you have.
 
