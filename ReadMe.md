@@ -252,6 +252,7 @@ Load project YAML from GitHub, after excution the project will create with remot
 ````
 project = mlrun.load_project(context="./project",url="git://github.com/GiladShapira94/load_project.git",clone=True,init_git=True,name='load-project',user_project=True)
 ````
+For private repositories - git://<Git User Name>:<Git Token>@github.com/GiladShapira94/load_project.git
 **Important -** if you change the project YAML for reload the project YAML you can use the reload function.
 * **Parameters  -**
   * sync – set to True to load functions objects
@@ -259,19 +260,48 @@ project = mlrun.load_project(context="./project",url="git://github.com/GiladShap
 ````
 project.reload(sync=True)
 ````
-#### Sync Project Functions - [link to function documentation](https://docs.mlrun.org/en/latest/api/mlrun.projects.html?highlight=sync_functions#mlrun.projects.MlrunProject.sync_functions)
-reload function objects from specs and files, after excution you will see the function on your project but it not deployed
+### Get fucntions - [link to function documentation](https://docs.mlrun.org/en/latest/api/mlrun.projects.html?highlight=get_function#mlrun.projects.MlrunProject.get_function)
+Get function Obejcts (Must before deploying serving or nuclion funcitons or before using apply(auto_mount)
+* **Parameters  -**
+ * key – name of key for search
+ * sync – will reload/reinit the function
+ * enrich – add project info/config/source info to the function object
+ * ignore_cache – read the function object from the DB (ignore the local cache)
 ````
-project.sync_functions(save=True)
+project.get_function('taxi')
 ````
+
 ### Build fucntions - [link to function documentation](https://docs.mlrun.org/en/latest/api/mlrun.projects.html?highlight=build_function#mlrun.projects.MlrunProject.build_function)
 Deploying no remote function object such as MLRun jobs.
+* **Parameters  -**
+  * function – name of the function (in the project) or function object
+  * with_mlrun – add the current mlrun package to the container build
+  * skip_deployed – skip the build if we already have an image for the function
+  * image – target image name/path
+  * base_image – base image name/path (commands and source code will be added to it)
+  * commands – list of docker build (RUN) commands e.g. [‘pip install pandas’]
+  * secret_name – k8s secret for accessing the docker registry
+  * mlrun_version_specifier – which mlrun package version to include (if not current)
+  * builder_env – Kaniko builder pod env vars dict (for config/credentials) e.g. builder_env={“GIT_TOKEN”: token}, does not work yet in KFP
 ````
 project.build_function('taxi')
 ````
 ### Deploy fucntions - [link to function documentation](https://docs.mlrun.org/en/latest/api/mlrun.projects.html?highlight=deploy_function#mlrun.projects.MlrunProject.deploy_function)
 Deploying remote function object such as MLRun nuclio and serving.
 **Important -** For getting function object, below you can see and example:.
+* **Parameters  -**
+  * function – name of the function (in the project) or function object
+  * dashboard – url of the remote Nuclio dashboard (when not local)
+  * models – list of model items
+  * env – dict of extra environment variables
+  * tag – extra version tag
 ````
-project.get_function('taxi')
+project.deploy_function('model-serving')
+````
+### Run fucntions - [link to function documentation](https://docs.mlrun.org/en/latest/api/mlrun.projects.html?highlight=run_function#mlrun.projects.MlrunProject.run_function)
+Run a local or remote task as part of a local/kubeflow pipeline.
+````
+ project.run_function(function='taxi',name='fetch_data',handler='fetch_data',
+                               inputs={'taxi_records_csv_path': taxi_records_csv_path,
+                                       'zones_csv_path': zones_csv_path},local=False)
 ````
