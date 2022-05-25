@@ -2,17 +2,36 @@
 
 #### prerequisite - 
 * Git - 
-  * You need to upload all the files that include in the project YAML on Cluster A to Git ot other remote storage.
+  * You need to upload all the files that include in the project YAML on Cluster A to Git ot other remote storage (init_git=True,if True, will git init the context dir) 
   * Add to the function YAML attributes, with_repo = True - If the function is not a single file function, and it requires access to multiple files/libraries in the project.
 * Remote Storage - 
   * All artifacts need to be upload to remote storage ot locally saved on Cluster B
 * load project or create one, Example:
 This important becuse you need to create an project object instance (MlrunProject object)
 ````
-project = mlrun.get_or_create_project(name='nyc-taxi-gilad',context='./nyc-gilad')
+from os import path
+import mlrun
+import os
+
+project_name_base = 'nyc-taxi-remote'
+
+project = mlrun.get_or_create_project(name=project_name_base, user_project=True,init_git=True,context='./dev-project')
 ````
 # Process on Cluster A (Source) - 
 For this Example i allready run a project that called nyc-taxi and he had two functions (taxi: mlrun job, model-serving: mlrun serving) and one trained model.
+## prerequisite - 
+* Define a remote path for artifacts - 
+  * You can change the path for each artifcats by change the artifact_path value in the log function, Examle:
+  ````
+  log_dataset(artifact_path='<Remote Path>','nyc-taxi-dataset-transformed', df=train_df,format='csv') 
+  log_artifact(artifact_path='<Remote Path>','nyc-taxi-dataset-transformed' format='csv')    
+  log_model('FareModel',body=dumps(model),artifact_path='<Remote Path>',model_file="FareModel.pkl")
+  ````
+  * You can change the project artifact path, this method will affect all fucntion (that mean that all artifacts will saved into this path), by using set_enviroment function, Example:
+  ````
+  artifact_path='s3://mlrun-v1-warroom/'
+  mlrun.set_environment(artifact_path=artifact_path)
+  ````
 ## Create Project YAML -
 On thie paragraph you would explain how to save your project YAML, and what are the option that you have.
 
@@ -222,4 +241,15 @@ project.reload(sync=True)
 reload function objects from specs and files, after excution you will see the function on your project but it not deployed
 ````
 project.sync_functions(save=True)
+````
+### Build fucntions - [link to function documentation](https://docs.mlrun.org/en/latest/api/mlrun.projects.html?highlight=build_function#mlrun.projects.MlrunProject.build_function)
+Deploying no remote function object such as MLRun jobs.
+````
+project.build_function('taxi')
+````
+### Deploy fucntions - [link to function documentation](https://docs.mlrun.org/en/latest/api/mlrun.projects.html?highlight=deploy_function#mlrun.projects.MlrunProject.deploy_function)
+Deploying remote function object such as MLRun nuclio and serving.
+**Important -** For getting function object, below you can see and example:.
+````
+project.get_function('taxi')
 ````
